@@ -1,0 +1,24 @@
+﻿{
+  "schemaVersion": 1,
+  "id": "railscout",
+  "version": "1.0.0",
+  "name": "RailScout",
+  "description": "Client-side rail telemetry for CivMC",
+  "authors": ["CreepilyCreeper"],
+  "contact": {
+    "homepage": "https://github.com/CreepilyCreeper/RailScout"
+  },
+  "license": "MIT",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "com.creepilycreeper.railscout.RailScoutClient"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.16.0"
+  },
+  "mixins": [
+    "railscout.mixins.json"
+  ]
+}

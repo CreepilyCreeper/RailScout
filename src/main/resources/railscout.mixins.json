@@ -1,0 +1,9 @@
+﻿{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.creepilycreeper.railscout.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "MinecartEntityMixin"
+  ]
+}
