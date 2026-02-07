@@ -7,6 +7,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.phys.Vec3;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -22,9 +24,9 @@ public class MinecartEntityMixin {
 
     private final List<SurveySerializer.Sample> railscout_samples = new ArrayList<>();
     private boolean railscout_wasRiding = false;
-    private double railscout_lastSpeed = 0.0;
     private int railscout_tickCounter = 0;
     private static String activeDestCommand = null;
+    private static final Logger LOGGER = LogManager.getLogger();
 
     public static void setActiveDestCommand(String cmd) {
         activeDestCommand = cmd;
@@ -48,8 +50,6 @@ public class MinecartEntityMixin {
                     BlockPos pos = self.blockPosition();
                     long ts = System.currentTimeMillis();
                     railscout_samples.add(new SurveySerializer.Sample(ts, pos.getX(), pos.getY(), pos.getZ(), horizSpeed));
-
-                    railscout_lastSpeed = horizSpeed;
                 }
             } else {
                 if (railscout_wasRiding) {
@@ -61,19 +61,21 @@ public class MinecartEntityMixin {
                             List<SurveySerializer.Segment> segments = SurveySerializer.computeSegmentsFromSamples(railscout_samples, COPPER_THRESHOLD);
                             SurveySerializer.writeSurveyFile(railscout_samples, segments, activeDestCommand, dim, uuid, name);
                         }
+                    } catch (java.io.IOException e) {
+                        LOGGER.error("Failed to write railscout survey file", e);
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        LOGGER.error("Unexpected error while writing railscout survey", e);
                     } finally {
                         railscout_samples.clear();
                         railscout_wasRiding = false;
-                        railscout_lastSpeed = 0.0;
+                        // reset counters/state
                         railscout_tickCounter = 0;
                         // activeDestCommand = null; // Maybe keep it for the next trip? Or clear it?
                     }
                 }
             }
-        } catch (Throwable t) {
-            t.printStackTrace();
+        } catch (Exception t) {
+            LOGGER.error("Unhandled exception in railscout mixin tick", t);
         }
     }
 }
